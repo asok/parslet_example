@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in parslet_example.gemspec
-gemspec
-
 gem 'parslet'
-# gem 'rspec'
+gem 'elasticsearch'
+
+gem 'rspec'
+gem 'byebug'

@@ -1,4 +1,3 @@
-# coding: utf-8
 require 'parslet'
 
 module ParsletExample
@@ -7,30 +6,44 @@ module ParsletExample
       match('[0-9]').repeat(4).as(name)
     end
 
-    rule(:empty) { str('') }
-    rule(:field) { match('[a-z_0-9]').repeat(1) }
-    rule(:between) { year(:gte) >> str('__') >> year(:lte) }
-    rule(:lte) { str('__') >> year(:lte) }
-    rule(:gte) { year(:gte) >> str('__') }
-    rule(:year_range) do
-      between | lte | gte
-    end
-    rule(:literal) do
-      (str(',,').absent? >> str('||').absent? >> any).repeat(1).as(:literal)
-    end
-    rule(:literals) do
-      literal >> (str('||') >> literal).repeat(0)
-    end
-    rule(:value) do
-      year_range | literals.repeat(1)
-    end
-    rule(:filter) do
-      field.as(:field) >> str(':') >> value.as(:value)
-    end
-    rule(:filters) do
-      (filter >> (str(',,') >> filter).repeat(0)).as(:filters) | empty
+    rule(:match_field) do
+      str('title')
     end
 
-    root(:filters)
+    rule(:filter_field) do
+      str('year')
+    end
+
+    rule(:value) do
+      (str(',,').absent? >> any).repeat
+    end
+
+    rule(:lte) do
+      str('__') >> year(:lte)
+    end
+
+    rule(:gte) do
+      year(:gte) >> str("__")
+    end
+
+    rule(:between) do
+      year(:gte) >> str("__") >> year(:lte)
+    end
+
+    rule(:range) do
+      between | lte | gte
+    end
+
+    rule(:subquery) do
+      (match_field.as(:match_field) | filter_field.as(:filter_field)) >>
+        str(':') >>
+        (range.as(:range) | value.as(:value))
+    end
+
+    rule(:subqueries) do
+      (subquery >> (str(',,') >> subquery).repeat(0)).repeat(1).as(:subqueries)
+    end
+
+    root(:subqueries)
   end
 end
